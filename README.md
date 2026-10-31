@@ -291,6 +291,36 @@ calls the same `switchbot_keypad_bridge.rearm` action:
 Local ESPHome automations (including sensor or MQTT callbacks) can also call
 `switchbot_keypad_bridge.rearm` directly.
 
+### Synchronizing both external-lock states
+
+The public `set_lock_state(bool locked)` method also supports unlocks made
+outside the keypad, such as a key or another automation. It only changes the
+state reported on the keypad's next poll: it never operates a physical lock
+or emits `on_lock`, `on_unlock`, or a keypad action event.
+
+```yaml
+text_sensor:
+  - platform: homeassistant
+    id: external_lock_state
+    entity_id: lock.front_door
+    internal: true
+    on_value:
+      then:
+        - lambda: |-
+            if (x == "locked") {
+              id(keypad_bridge).set_lock_state(true);
+            } else if (x == "unlocked") {
+              id(keypad_bridge).set_lock_state(false);
+            }
+```
+
+Other states, including `unknown`, `unavailable`, `locking`, and `unlocking`,
+are deliberately ignored. Reporting locked cancels the automatic rearm timer;
+reporting unlocked starts or restarts the configured `rearm_after` countdown.
+Use `rearm_after: 0s` if the reported state must follow confirmed lock feedback
+without a timer override. Call this method from local ESPHome automations on
+the main task, not from BLE callbacks.
+
 To rearm only when your actual lock reports that it is locked, set
 `rearm_after: 0s`, enable the button above, and use a Home Assistant automation:
 

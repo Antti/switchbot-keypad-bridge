@@ -34,6 +34,12 @@ api:
         reason: string
       then:
         - switchbot_keypad_bridge.rearm: keypad_bridge
+    # Public compatibility API used by external-lock state callbacks.
+    - action: sync_external_lock_state
+      variables:
+        locked: bool
+      then:
+        - lambda: id(keypad_bridge).set_lock_state(locked);
 
 ota:
   - platform: esphome

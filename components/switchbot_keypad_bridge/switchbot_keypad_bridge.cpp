@@ -426,6 +426,15 @@ void SwitchbotKeypadBridge::rearm() {
   ESP_LOGI(TAG, "Reporting locked state on the next keypad poll (rearm)");
 }
 
+void SwitchbotKeypadBridge::set_lock_state(bool locked) {
+  if (locked) {
+    this->rearm();
+  } else {
+    this->keypad_state_.unlock(millis());
+    ESP_LOGI(TAG, "Reporting unlocked state on the next keypad poll (external lock)");
+  }
+}
+
 void SwitchbotKeypadBridge::update_rearm_timer_() {
   if (this->keypad_state_.update(millis())) {
     ESP_LOGI(TAG, "Face/palm rearm timer expired; reporting locked state on the next keypad poll");

@@ -82,6 +82,12 @@ class SwitchbotKeypadBridge : public Component {
   // or publishing a Lock event. Safe to call from local ESPHome automations.
   void rearm();
 
+  // Synchronize the state reported to the keypad with an external lock.
+  // Does not operate a physical lock or publish Lock/Unlock events. Call
+  // from the ESPHome main task, for example a Home Assistant sensor callback.
+  // Locked cancels the timer; unlocked starts the configured rearm countdown.
+  void set_lock_state(bool locked);
+
   bool is_pairing_active() const { return this->pairing_ui_.is_running(); }
 
   // Forgets the linked keypad and lock, rotates the shared key in place and
